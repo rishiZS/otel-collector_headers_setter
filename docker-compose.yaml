@@ -1,0 +1,36 @@
+version: '3.9'
+
+# network_mode: host
+
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.59.0
+    command: [ "--config=/etc/otel-collector.yaml"]
+    volumes:
+      - ./otel-collector.multitenant.yaml:/etc/otel-collector.yaml
+      - ./cert.pem:/etc/cert.pem
+      - ./cert-key.pem:/etc/cert-key.pem
+    ports:
+      - "9411:9411"
+      - "4318:4318"     #tempo http
+      # - "4317:4317"    #temppo grpc
+      # - "8083:8080"
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data/:/tmp/tempo
+      - ./ca.pem/:/etc/ca.pem
+      - ./ca-key.pem/:/etc/ca-key.pem
+      - ./cert.pem:/etc/cert.pem
+      - ./cert-key.pem:/etc/cert-key.pem
+
+    ports:
+      - "3200:3200"   # tempo
+      - "4317:4317"        #otlp GRPC
+      # - "4318:4318"    #tempo http
+      # - "9411"        #zipkin
+
+   

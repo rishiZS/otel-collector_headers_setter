@@ -1,0 +1,114 @@
+# extensions:
+#   headers_setter:
+#     headers:
+#       - key: X-Scope-OrgId
+#         from_context: tenant_id
+      # - key: User-ID
+      #   value: user_id
+
+# # extensions:
+# #   zpages:
+
+# # routing:
+# #   default_exporters:
+# #   - otlp
+# #   attribute_source: context
+# #   from_attribute: X-Scope-OrgId
+# #   table:
+# #   - value: acme
+# #   #   exporters:
+# #   #   # - jaeger/acme
+# #   #   - otlp/acme
+# #   # - value: globex
+# #     exporters:
+# #     - otlp/globex
+
+# receivers:
+#   zipkin: 
+    # protocols:
+    #   http:
+    #     include_metadata: true
+
+# processors:
+#   nop:
+
+# exporters:
+#   otlp:
+#     endpoint: tempo:4317
+#     # headers:
+#     #   authorization: Basic $DIGEST
+#     tls:
+#       insecure: true 
+  #  auth:
+  #    authenticator: headers_setter
+#     # headers:
+#     #   x-scope-orgid: 123
+# service:
+#   extensions: [ headers_setter ]
+#   # extensions: [zpages]
+#   pipelines:
+#     traces:
+#       receivers: [zipkin]
+#       processors: [nop]
+#       exporters: [otlp]
+# -----------------main
+extensions:
+  headers_setter:
+    headers:
+      - key: X-Scope-OrgId
+        from_context: X-Scope-OrgId
+receivers:
+  zipkin:
+    include_metadata: true
+  otlp:
+    # include_metadata: true
+    protocols:
+      http:
+        include_metadata: true
+   
+# processors:
+#   nop:
+
+exporters:
+  # otlphttp:
+  #   endpoint: http://localhost:8083/v1/traces
+  otlp:
+    endpoint: tempo:4317
+    tls:
+      cert_file: /etc/cert.pem
+      key_file: /etc/cert-key.pem
+      # insecure: true
+      
+      insecure_skip_verify: true
+    auth:
+      authenticator: headers_setter
+    
+service:
+  extensions: [ headers_setter ]
+  pipelines:
+    traces:
+      receivers: [zipkin,otlp]
+      # processors: [nop]
+      exporters: [otlp]
+
+
+
+# receivers:
+#   zipkin:  
+
+# processors:
+#   batch:
+
+# exporters:
+#   otlp:
+#     endpoint: tempo:4317
+#     tls:
+#       insecure: true
+#     headers:
+#       x-scope-orgid: 3214
+# service:
+#   pipelines:
+#     traces:
+#       receivers: [zipkin]
+#       processors: [batch]
+#       exporters: [otlp]
